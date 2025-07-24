@@ -1,0 +1,65 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "mrs-debugger",
+			"request": "launch",
+			"name": "V307_FreeRTOS",
+			"cwd": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS",
+			"openOCDCfg": {
+				"useLocalOpenOCD": true,
+				"executable": "/Applications/MounRiver Studio.app/Contents/Resources/app/resources/darwin/components/WCH/OpenOCD/OpenOCD/bin/openocd",
+				"configOptions": [
+					"-f \"/Applications/MounRiver Studio.app/Contents/Resources/app/resources/darwin/components/WCH/OpenOCD/OpenOCD/bin/wch-riscv.cfg\" -c \"chip_id CH32V30x\""
+				],
+				"gdbport": 3333,
+				"telnetport": 4444,
+				"tclport": 6666,
+				"host": "localhost",
+				"port": 3333,
+				"skipDownloadBeforeDebug": false,
+				"enablePageEraser": false,
+				"enableNoZeroWaitingAreaFlash": false
+			},
+			"gdbCfg": {
+				"executable": "/Applications/MounRiver Studio.app/Contents/Resources/app/resources/darwin/components/WCH/Toolchain/RISC-V Embedded GCC12/bin/riscv-wch-elf-gdb",
+				"commands": [
+					"set mem inaccessible-by-default off",
+					"set architecture riscv:rv32",
+					"set remotetimeout unlimited",
+					"set disassembler-options xw"
+				],
+				"options": []
+			},
+			"startup": {
+				"initCommands": {
+					"initReset": true,
+					"initResetType": "init",
+					"armSemihosting": false,
+					"additionalCommands": []
+				},
+				"loadedFiles": {
+					"executableFile": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS/obj/V307_FreeRTOS.elf",
+					"symbolFile": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS/obj/V307_FreeRTOS.elf",
+					"executableFileOffset": 0,
+					"symbolFileOffset": 0
+				},
+				"runCommands": {
+					"runReset": true,
+					"runResetType": "halt",
+					"additionalCommands": [],
+					"setBreakAt": "handle_reset",
+					"continue": true,
+					"setProgramCounterAt": 0
+				},
+				"debugInRAM": false
+			},
+			"svdpath": "/Applications/MounRiver Studio.app/Contents/Resources/app/resources/darwin/components/WCH/SDK/default/RISC-V/CH32V307/NoneOS/CH32V307xx.svd",
+			"output": {
+				"showDebugGDBTrace": true,
+				"saveDebugOutputToFile": false,
+				"showDebugOutputTimestamps": true
+			}
+		}
+	]
+}
