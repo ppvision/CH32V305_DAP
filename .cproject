@@ -300,7 +300,7 @@
             </toolChain>
           </folderInfo>
           <sourceEntries>
-            <entry excluding="FreeRTOS/portable/Common/mpu_wrappers.c|Startup/startup_ch32v30x_D8.S|blackmagic|归档|tinyusb/usb_descriptors_x.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+            <entry excluding="FreeRTOS/portable/Common/mpu_wrappers.c|Startup/startup_ch32v30x_D8.S|blackmagic|归档|tinyusb/usb_descriptors_x.c|Lib/Tinyusb|Lib/CMSIS_5" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
           </sourceEntries>
         </configuration>
       </storageModule>

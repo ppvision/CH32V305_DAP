@@ -5,7 +5,7 @@
 			"type": "mrs-debugger",
 			"request": "launch",
 			"name": "V307_FreeRTOS",
-			"cwd": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS",
+			"cwd": "/Users/bright/MY_GITHUB/CH32V305_DAP",
 			"openOCDCfg": {
 				"useLocalOpenOCD": true,
 				"executable": "/Applications/MounRiver Studio.app/Contents/Resources/app/resources/darwin/components/WCH/OpenOCD/OpenOCD/bin/openocd",
@@ -39,8 +39,8 @@
 					"additionalCommands": []
 				},
 				"loadedFiles": {
-					"executableFile": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS/obj/V307_FreeRTOS.elf",
-					"symbolFile": "/Users/bright/mounriver-studio-projects/V307_FreeRTOS/obj/V307_FreeRTOS.elf",
+					"executableFile": "/Users/bright/MY_GITHUB/CH32V305_DAP/obj/V307_FreeRTOS.elf",
+					"symbolFile": "/Users/bright/MY_GITHUB/CH32V305_DAP/obj/V307_FreeRTOS.elf",
 					"executableFileOffset": 0,
 					"symbolFileOffset": 0
 				},

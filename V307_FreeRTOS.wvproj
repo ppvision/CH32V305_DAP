@@ -5,12 +5,12 @@
 		"chipInfo": {
 			"vendor": "WCH",
 			"toolchain": "RISC-V",
-			"series": "CH32V307",
-			"rtos": "FreeRTOS",
-			"mcu": "CH32V307RCT6",
-			"description": "Website: http://www.wch.cn/products/CH32V307.html?\\nROM(byte): 256K, SRAM(byte): 64K, CHIP PINS: 64, GPIO PORTS: 51.\\nWCH CH32V3 series of mainstream MCUs covers the needs of a large variety of applications in the industrial,medical and consumer markets. High performance with first-class peripherals and low-power,low-voltage operation is paired with a high level of integration at accessible prices with a simple architecture and easy-to-use tools.",
+			"series": "CH32V305",
+			"rtos": "NoneOS",
+			"mcu": "CH32V305GBU6",
+			"description": "",
 			"link": "WCH-Link",
-			"peripheral_version": "2.7"
+			"peripheral_version": "1.0"
 		},
 		"linkedFolders": [],
 		"removedResources": [
@@ -42,7 +42,11 @@
 				"excludeResources": [
 					"${project}/FreeRTOS/portable/Common/mpu_wrappers.c",
 					"${project}/Startup/startup_ch32v30x_D8.S",
-					"${project}/blackmagic"
+					"${project}/blackmagic",
+					"${project}/归档",
+					"${project}/tinyusb/usb_descriptors_x.c",
+					"${project}/Lib/Tinyusb",
+					"${project}/Lib/CMSIS_5"
 				],
 				"riscvTargetProcessor": {
 					"architecture": "rv32i",
@@ -658,13 +662,13 @@
 	"flashConfig": {
 		"mcutype": "CH32V30x",
 		"address": "0x08000000",
-		"target_path": "obj\\V307_FreeRTOS.hex",
+		"target_path": "",
 		"clkSpeed": "High",
 		"debug_interface_mode": "1-wire serial",
-		"erase": true,
-		"program": true,
-		"verify": true,
-		"reset": true,
+		"erase": false,
+		"program": false,
+		"verify": false,
+		"reset": false,
 		"sdiPrintf": false,
 		"disablepowerout": false,
 		"clearcodeflash": false,

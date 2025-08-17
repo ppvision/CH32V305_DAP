@@ -682,13 +682,15 @@ static uint32_t DAP_SWD_Transfer(const uint8_t* request, uint8_t* response) {
     while (request_count != 0) {
         request_count--;
         request_value = *request++;
-        int left = RxDapMsgEndAt - request;
+
+
+        /*int left = RxDapMsgEndAt - request;
         int used = request - request_head;
         
         // printf(" DAP_SWD_Transfer LeftNum:%d LeftSpace:%d Used:%d\r\n",request_count,left,used);
         if(left <=0 && request_count>0){
           printf("goto end->Left Space:%d Used:%d LeftNum:%d\r\n",left,used,request_count);
-        }
+        }*/
 
         if ((request_value & DAP_TRANSFER_RnW) != 0U) {
             // Read register
@@ -917,7 +919,7 @@ end:
     *(response_head + 0) = (uint8_t)response_count;
     *(response_head + 1) = (uint8_t)response_value;
 
-    request_num>10? printf("REQ Num:%d RESP Num: %d\r\n",request_num,response_count):0;
+    // request_num>10? printf("REQ Num:%d RESP Num: %d\r\n",request_num,response_count):0;
     return (((uint32_t)(request - request_head) << 16) | (uint32_t)(response - response_head));
 }
 #endif
@@ -979,8 +981,7 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                     // Read previous data and post next read
                     do {
                         response_value = JTAG_Transfer(request_value, &data);
-                    } while ((response_value == DAP_TRANSFER_WAIT) && retry-- &&
-                             !DAP_TransferAbort);
+          } while ((response_value == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
                 } else {
                     // Select JTAG chain
                     if (ir != JTAG_DPACC) {
@@ -990,15 +991,14 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                     // Read previous data
                     do {
                         response_value = JTAG_Transfer(DP_RDBUFF | DAP_TRANSFER_RnW, &data);
-                    } while ((response_value == DAP_TRANSFER_WAIT) && retry-- &&
-                             !DAP_TransferAbort);
+          } while ((response_value == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
                     post_read = 0U;
                 }
                 if (response_value != DAP_TRANSFER_OK) {
                     break;
                 }
                 // Store previous data
-                *response++ = (uint8_t)data;
+        *response++ = (uint8_t) data;
                 *response++ = (uint8_t)(data >> 8);
                 *response++ = (uint8_t)(data >> 16);
                 *response++ = (uint8_t)(data >> 24);
@@ -1039,13 +1039,11 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                     retry = DAP_Data.transfer.retry_count;
                     do {
                         response_value = JTAG_Transfer(request_value, &data);
-                    } while ((response_value == DAP_TRANSFER_WAIT) && retry-- &&
-                             !DAP_TransferAbort);
+          } while ((response_value == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
                     if (response_value != DAP_TRANSFER_OK) {
                         break;
                     }
-                } while (((data & DAP_Data.transfer.match_mask) != match_value) && match_retry-- &&
-                         !DAP_TransferAbort);
+        } while (((data & DAP_Data.transfer.match_mask) != match_value) && match_retry-- && !DAP_TransferAbort);
                 if ((data & DAP_Data.transfer.match_mask) != match_value) {
                     response_value |= DAP_TRANSFER_MISMATCH;
                 }
@@ -1064,8 +1062,7 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                     retry = DAP_Data.transfer.retry_count;
                     do {
                         response_value = JTAG_Transfer(request_value, NULL);
-                    } while ((response_value == DAP_TRANSFER_WAIT) && retry-- &&
-                             !DAP_TransferAbort);
+          } while ((response_value == DAP_TRANSFER_WAIT) && retry-- && !DAP_TransferAbort);
                     if (response_value != DAP_TRANSFER_OK) {
                         break;
                     }
@@ -1073,7 +1070,7 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                     // Store Timestamp
                     if ((request_value & DAP_TRANSFER_TIMESTAMP) != 0U) {
                         timestamp = DAP_Data.timestamp;
-                        *response++ = (uint8_t)timestamp;
+            *response++ = (uint8_t) timestamp;
                         *response++ = (uint8_t)(timestamp >> 8);
                         *response++ = (uint8_t)(timestamp >> 16);
                         *response++ = (uint8_t)(timestamp >> 24);
@@ -1106,8 +1103,10 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t* request, uint8_t* response) {
                 post_read = 0U;
             }
             // Load data
-            data = (uint32_t)(*(request + 0) << 0) | (uint32_t)(*(request + 1) << 8) |
-                   (uint32_t)(*(request + 2) << 16) | (uint32_t)(*(request + 3) << 24);
+      data = (uint32_t)(*(request+0) <<  0) |
+             (uint32_t)(*(request+1) <<  8) |
+             (uint32_t)(*(request+2) << 16) |
+             (uint32_t)(*(request+3) << 24);
             request += 4;
             if ((request_value & DAP_TRANSFER_MATCH_MASK) != 0U) {
                 // Write match mask
@@ -1203,8 +1202,9 @@ end:
 //   response: pointer to response data
 //   return:   number of bytes in response (lower 16 bits)
 //             number of bytes in request (upper 16 bits)
-static uint32_t DAP_Dummy_Transfer(const uint8_t* request, uint8_t* response) {
-    const uint8_t* request_head;
+static uint32_t DAP_Dummy_Transfer(const uint8_t *request, uint8_t *response) {
+  const
+  uint8_t  *request_head;
     uint32_t request_count;
     uint32_t request_value;
 
@@ -1668,7 +1668,7 @@ bool parse_dap_transfer_block(const uint8_t* data, int data_len, int* out_length
     #define DAP_TransferBlock_Header_Size 5
 
     if (data == NULL || out_length == NULL || data_len < DAP_TransferBlock_Header_Size ) {
-        return false; // 输入无效或内存不�?
+        return false; // ￨ﾾﾓ￥ﾅﾥ￦ﾗﾠ￦ﾕﾈ￦ﾈﾖ￥ﾆﾅ￥ﾭﾘ￤ﾸﾍ￨ﾶ?
     }
 
     uint16_t transfer_count                = data[3]<<8 | data[2];
@@ -1696,6 +1696,7 @@ bool parse_dap_transfer_block(const uint8_t* data, int data_len, int* out_length
 }
 
 
+extern uint32_t RxDapMsgLen;
 // Process DAP command request and prepare response
 //   request:  pointer to request data
 //   response: pointer to response data
@@ -1708,7 +1709,7 @@ uint32_t DAP_ProcessCommand(const uint8_t* request, uint8_t* response) {
         return DAP_ProcessVendorCommand(request, response);
     }
 
-  uint32_t buff_size = RxDapMsgEndAt - request;
+  uint32_t buff_size = RxDapMsgLen;
 
     *response++ = *request;
   uint8_t cmd_code = *request++;
@@ -1867,8 +1868,10 @@ uint32_t DAP_ExecuteCommand(const uint8_t* request, uint8_t* response) {
     return DAP_ProcessCommand(request, response);
 }
 
+
 // Setup DAP
 void DAP_Setup(void) {
+
     // Default settings
     DAP_Data.debug_port = 0U;
     DAP_Data.transfer.idle_cycles = 0U;
@@ -1888,117 +1891,3 @@ void DAP_Setup(void) {
     DAP_SETUP(); // ONLY set GPIOs for leds
     // Device specific setup
 }
-#if 0
-void show_dap_request(uint8_t cmd) {
-      switch (cmd) {
-      case ID_DAP_Info:
-      printf("ID_DAP_Info \n");
-      break;
-      case ID_DAP_HostStatus:
-      printf("ID_DAP_HostStatus \n");
-      break;
-      case ID_DAP_Connect:
-      printf("ID_DAP_Connect \n");
-      break;
-      case ID_DAP_Disconnect:
-      printf("ID_DAP_Disconnect \n");
-      break;
-
-      case ID_DAP_Delay:
-      printf("ID_DAP_Delay \n");
-      break;
-
-      case ID_DAP_ResetTarget:
-      printf("ID_DAP_ResetTarget \n");
-      break;
-
-      case ID_DAP_SWJ_Pins:
-      printf("ID_DAP_SWJ_Pins \n");
-      break;
-      case ID_DAP_SWJ_Clock:
-      printf("ID_DAP_SWJ_Clock \n");
-      break;
-      case ID_DAP_SWJ_Sequence:
-      printf("ID_DAP_SWJ_Sequence \n");
-      break;
-
-      case ID_DAP_SWD_Configure:
-      printf("ID_DAP_SWD_Configure \n");
-      break;
-      case ID_DAP_SWD_Sequence:
-      printf("ID_DAP_SWD_Sequence \n");
-      break;
-
-      case ID_DAP_JTAG_Sequence:
-      printf("ID_DAP_JTAG_Sequence \n");
-      break;
-      case ID_DAP_JTAG_Configure:
-      printf("ID_DAP_JTAG_Configure \n");
-      break;
-      case ID_DAP_JTAG_IDCODE:
-      printf("ID_DAP_JTAG_IDCODE \n");
-      break;
-
-      case ID_DAP_TransferConfigure:
-      printf("ID_DAP_TransferConfigure \n");
-      break;
-      case ID_DAP_Transfer:
-      printf("ID_DAP_Transfer \n");
-      break;
-      case ID_DAP_TransferBlock:
-      printf("ID_DAP_TransferBlock \n");
-      break;
-      ;
-
-      case ID_DAP_WriteABORT:
-      printf("ID_DAP_WriteABORT \n");
-      break;
-
-#if ((SWO_UART != 0) || (SWO_MANCHESTER != 0))
-      case ID_DAP_SWO_Transport:
-      num = SWO_Transport(request, response);
-      break;
-      case ID_DAP_SWO_Mode:
-      num = SWO_Mode(request, response);
-      break;
-      case ID_DAP_SWO_Baudrate:
-      num = SWO_Baudrate(request, response);
-      break;
-      case ID_DAP_SWO_Control:
-      num = SWO_Control(request, response);
-      break;
-      case ID_DAP_SWO_Status:
-      num = SWO_Status(response);
-      break;
-      case ID_DAP_SWO_ExtendedStatus:
-      num = SWO_ExtendedStatus(request, response);
-      break;
-      case ID_DAP_SWO_Data:
-      num = SWO_Data(request, response);
-      break;
-#endif
-
-#if (DAP_UART != 0)
-      case ID_DAP_UART_Transport:
-      num = UART_Transport(request, response);
-      break;
-      case ID_DAP_UART_Configure:
-      num = UART_Configure(request, response);
-      break;
-      case ID_DAP_UART_Control:
-      num = UART_Control(request, response);
-      break;
-      case ID_DAP_UART_Status:
-      num = UART_Status(response);
-      break;
-      case ID_DAP_UART_Transfer:
-      num = UART_Transfer(request, response);
-      break;
-#endif
-
-      default:
-      printf("ID_DAP_Invalid %d\n", cmd);
-      break;
-      }
-  }
-#endif

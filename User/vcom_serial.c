@@ -41,7 +41,8 @@ void USART3_IRQHandler(void) {
         if(received_len && cdc_rcv_queue){
             // 重置DMA（循环模式下自动覆盖旧数据）
             BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-            size_t xBytesSent = xMessageBufferSendFromISR( cdc_rcv_queue,
+            // size_t xBytesSent = 
+            xMessageBufferSendFromISR( cdc_rcv_queue,
                         ( void * ) RxBuffer,received_len,
                         &xHigherPriorityTaskWoken );
         }
@@ -65,7 +66,8 @@ void DMA1_Channel3_IRQHandler(void) {
         // 处理接收完成的数据
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         if(cdc_rcv_queue){
-            size_t xBytesSent = xMessageBufferSendFromISR( cdc_rcv_queue,
+            //size_t xBytesSent = 
+            xMessageBufferSendFromISR( cdc_rcv_queue,
                     ( void * ) RxBuffer,RXDMA_SZ,
                     &xHigherPriorityTaskWoken );
         }

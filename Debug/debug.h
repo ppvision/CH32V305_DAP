@@ -33,8 +33,15 @@
 #endif
 
 #ifndef ENABLE_PRINTF
-#define ENABLE_PRINTF 1
+#define ENABLE_PRINTF 0
 #endif
+
+#if ENABLE_PRINTF
+#define DAP_Printf printf
+#else
+#define DAP_Printf(...) 
+#endif
+
 
 /* SDI Printf Definition */
 #define SDI_PR_CLOSE   0

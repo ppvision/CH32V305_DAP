@@ -83,7 +83,7 @@ This information includes:
 /// Default communication speed on the Debug Access Port for SWD and JTAG mode.
 /// Used to initialize the default SWD/JTAG clock frequency.
 /// The command \ref DAP_SWJ_Clock can be used to overwrite this default setting.
-#define DAP_DEFAULT_SWJ_CLOCK   4000000U        ///< Default SWD/JTAG clock frequency in Hz.
+#define DAP_DEFAULT_SWJ_CLOCK   2000000U        ///< Default SWD/JTAG clock frequency in Hz.
 
 /// Maximum Package Size for Command and Response data.
 /// This configuration settings is used to optimize the communication performance with the
@@ -96,7 +96,7 @@ This information includes:
 /// This configuration settings is used to optimize the communication performance with the
 /// debugger and depends on the USB peripheral. For devices with limited RAM or USB buffer the
 /// setting can be reduced (valid range is 1 .. 255).
-#define DAP_PACKET_COUNT        2U              ///< Specifies number of packets buffered.
+#define DAP_PACKET_COUNT        (2)              ///< Specifies number of packets buffered.
 
 /// Indicate that UART Serial Wire Output (SWO) trace is available.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
@@ -321,6 +321,7 @@ of the same I/O port. The following SWDIO I/O Pin functions are provided:
     #define SWDIO_PIN           GPIO_Pin_3
     #define SWDIO_PIN_INDEX     3
   #else
+    //Here debuger myself UART TX ->clk. RX -> SWD
     #define SWCLK_PORT          GPIOB
     #define SWCLK_PIN           GPIO_Pin_10
     #define SWDIO_PORT          GPIOB

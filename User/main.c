@@ -22,20 +22,31 @@
 #include "tusb.h"
 #include "vcom_serial.h"
 #include "DAP.h"
+#include "DAP_config.h"
 #include "message_buffer.h"
 
 
 
 /* Global define */
-#define LED_TASK_PRIO     5
-#define USB_TASK_PRIO     5+2
-#define LED_STK_SIZE      256*2
+#define LED_TASK_PRIO      5+5
+#define USB_TASK_PRIO      5+5
+#define UART_TASK_PRIO     5+3
+#define DAP_TASK_PRIO      5+4
+
+
+#define LED_STK_SIZE      256
+#define UART_STK_SIZE     256
+#define USB_STK_SIZE      256
+#define DAP_STK_SIZE      256
 
 /* Global Variable */
-TaskHandle_t LED_Task_Handler;
-TaskHandle_t USBTask_Handler;
+TaskHandle_t LED_Task_Handler = NULL;
+TaskHandle_t USB_Task_Handler = NULL;
+TaskHandle_t DAP_Task_Handler = NULL;
+TaskHandle_t UART_Task_Handler= NULL;
 MessageBufferHandle_t cdc_rcv_queue = NULL;
 
+MessageBufferHandle_t dap_rcv_queue = NULL;
 
 static uint32_t led_delay_ms = 500;
 
@@ -75,78 +86,16 @@ void GPIO_Toggle_INIT(void)
  * @param  *pvParameters - Parameters point of task2
  *
  * @return  none
- */
+ *********************************************************************/
 
-//--------------------------------------------------------------------+
-// USB CDC
-//--------------------------------------------------------------------+
+// #define CFG_DAP_RCV_BUFSIZE  (512*2*2)
 
-// send characters to both CDC and WebUSB
-void echo_all(const uint8_t buf[], uint32_t count) {
-   if (tud_cdc_connected()) {
-    for (uint32_t i = 0; i < count; i++) {
-      tud_cdc_write_char(buf[i]);
-      if (buf[i] == '\r') {
-        tud_cdc_write_char('\n');
-      }
-    }
-    tud_cdc_write_flush();
-  }
-}
+// static uint8_t TxDataBuffer[CFG_DAP_RCV_BUFSIZE];
+// static uint8_t RxDataBuffer[CFG_DAP_RCV_BUFSIZE];
 
-
-#define LOG_DAP(str) //echo_all(str,strlen(str))
-#define CFG_DAP_RCV_BUFSIZE  (512*2*2)
-
-static uint8_t TxDataBuffer[CFG_DAP_RCV_BUFSIZE];
-static uint8_t RxDataBuffer[CFG_DAP_RCV_BUFSIZE];
-
-volatile uint8_t* RxDapMsgEndAt = NULL;
-volatile uint8_t* RxOffset      = RxDataBuffer;
 static volatile int usbRcvIdx   = 0;
 
 extern uint32_t DAP_ProcessCommand       (const uint8_t *request, uint8_t *response);
-// void  handle_dap_message(const uint8_t* pbuffer, uint32_t recv_len ,uint32_t usb_recv ) {
-//     uint32_t handled_len = 0;
-//     uint32_t ret_len  = 0;
-//     uint32_t resp_len  = 0;
-//     uint32_t pack_size = 0;
-//     int loop = 0;
-//     RxDapMsgEndAt = (uint8_t*)pbuffer + recv_len;
-//     do{
-//         loop++;
-        
-//         ret_len =  DAP_ProcessCommand(pbuffer + handled_len,TxDataBuffer);
-//         int left = recv_len- handled_len;
-//         if(ret_len ==0 ){
-//             if(left >= sizeof(RxDataBuffer)){
-//                 printf("==========================Error LEFT:%d\r\n",left);
-//                 tud_vendor_read_flush();  dd
-//                 break;
-//             } 
-//             if(handled_len){
-//                 memmove(RxDataBuffer,pbuffer + handled_len,left);
-//             }
-//             RxOffset = RxDataBuffer + left;
-//             printf("\t Lost: offset:%d   left:%d  PEEK[%x][%x][%x][%x]\r\n",handled_len,left,  RxDataBuffer[0],RxDataBuffer[1],RxDataBuffer[2],RxDataBuffer[3]);
-//             break;
-//         }
-//         pack_size    = ret_len >>16;
-//         resp_len     = ret_len & 0xffff;   
-
-//         if(loop>1) printf("Loop:[%4d][RCV:%d] Offset:%d left:%d pack_size:%d  resp_len:%d   PEEK[%x][%x][%x][%x]\r\n",loop,usb_recv, handled_len, left,pack_size,resp_len,pbuffer[handled_len],
-//             pbuffer[handled_len+1],pbuffer[handled_len+2],pbuffer[handled_len+3]);
-
-//         handled_len += pack_size;
-//         tud_vendor_write(TxDataBuffer, resp_len);
-//         tud_vendor_flush();
-//         if(handled_len >= recv_len){
-//             break;
-//         } 
-//     }while(recv_len>handled_len);
-//     // tud_vendor_flush();
-// }
-
 #if ENABLE_PRINTF
 #define DAP_Printf printf
 #else
@@ -185,6 +134,7 @@ char * dap_cmd_string[] = {
     [ID_DAP_ExecuteCommands    ] = "DAP_ExecuteCommands",
 };
 
+#if 0 
 
 void dump_memory(uint8_t *pbuff,uint32_t buff_size,int col){
     for(uint32_t i = 0;i<buff_size;i++){
@@ -193,7 +143,7 @@ void dump_memory(uint8_t *pbuff,uint32_t buff_size,int col){
     printf("\r\n");
 }
 
-#if OPT_CMSIS_DAPV2
+OPT_CMSIS_DAPV2
 
 void  handle_dap_message(const uint8_t* pbuffer, uint32_t buff_size ,uint32_t usb_recv) {
     uint32_t handled_len = 0;
@@ -217,7 +167,7 @@ void  handle_dap_message(const uint8_t* pbuffer, uint32_t buff_size ,uint32_t us
                 resp_len,TxDataBuffer[0],TxDataBuffer[1],TxDataBuffer[2],TxDataBuffer[3],TxDataBuffer[4],TxDataBuffer[5],TxDataBuffer[6],TxDataBuffer[7]);
         }else if(ret_len ==0 ){
             if(left >= sizeof(RxDataBuffer)){
-                DAP_Printf("==========================Error LEFT:%d\r\n",left);
+                printf("==========================Error LEFT:%d\r\n",left);
                 tud_vendor_read_flush();
                 break;
             } 
@@ -250,42 +200,19 @@ void  handle_dap_message(const uint8_t* pbuffer, uint32_t buff_size ,uint32_t us
 }
 
 
-
-
 TimerHandle_t xClearBufTimer;
 void dapBuf_ClearTimer( TimerHandle_t xTimer ){
     RxOffset = RxDataBuffer;
     // printf(">>>>>clear<<<<<<\r\n");
 }
 
-
-
-void do_dap_message() {
-    uint32_t recv_len = tud_vendor_available();
-    if (recv_len) {
-        xTimerReset(xClearBufTimer,100);
-        usbRcvIdx ++; led_delay_ms = 50;
-        uint32_t offset = RxOffset - RxDataBuffer;
-        recv_len = tud_vendor_read((void*)RxOffset, sizeof(RxDataBuffer) - offset);
-        dump_memory(RxOffset,recv_len,32);
-
-        RxOffset = RxDataBuffer;
-        if(offset){//second Read !!
-            if(RxDataBuffer[offset] == ID_DAP_Disconnect){
-                return  handle_dap_message(RxDataBuffer + offset,recv_len,recv_len);
-            }
-        }
-        // printf("USB recv:%d\r\n",recv_len);
-        handle_dap_message(RxDataBuffer,recv_len+offset,recv_len);
-        // uint16_t bits =  GPIO_ReadOutputData(GPIOC);
-        // (bits & 1<<10)?GPIO_ResetBits(GPIOC, GPIO_Pin_10):GPIO_SetBits(GPIOC, GPIO_Pin_10);//data active
-    }
-}
 #endif
+
 static  int  tinyusb_inited = false;
-void cdc_task(void) {
-    if(1){
+void cdc_thread(void*) {
+    while(1){
         if(!tinyusb_inited) {
+            vTaskDelay(pdMS_TO_TICKS(50)); 
             return;
         }
         // blackmagic_main(1,NULL);
@@ -373,22 +300,63 @@ void led_task(void *pvParameters)
     }
 }
 
+
+#define MSG_LENGHT (DAP_PACKET_SIZE*2)
+static uint8_t dapRx_Cache[MSG_LENGHT]={0};
+static uint8_t dapTx_Cache[MSG_LENGHT]={0};
+uint32_t RxDapMsgLen = 0;
+uint32_t recv_len = 0;
+
+void dap_thread(void * p){
+    printf("HERE in DAP thread\r\n");
+    while(dap_rcv_queue){
+
+        size_t nLen = xMessageBufferReceive(dap_rcv_queue,(void *)dapRx_Cache,MSG_LENGHT,portMAX_DELAY);
+        if(nLen<=0) continue;
+        RxDapMsgLen = (uint32_t)nLen;
+        uint32_t ret_len = DAP_ExecuteCommand(dapRx_Cache,dapTx_Cache);
+        // uint32_t pack_size    = ret_len >>16;
+        uint32_t resp_len     = ret_len & 0xffff; 
+
+        if(resp_len){
+            tud_vendor_write(dapTx_Cache, resp_len);
+            tud_vendor_flush();
+        }else{
+            DAP_Printf("Resp Size is Zero\r\n");
+        }
+        DAP_Printf("USB recv:(%d,%d) resp:%d\r\n",recv_len,nLen,resp_len);
+    }
+
+}
+/*********************************************************************/
+static uint8_t dapRx_Buff[MSG_LENGHT]={0};
+
 void tusb_task(void *pvParameters)
 {
 
     tusb_rhport_init_t dev_init = {.role = TUSB_ROLE_DEVICE, .speed = TUSB_SPEED_AUTO};
     tusb_init (BOARD_TUD_RHPORT, &dev_init);
     tinyusb_inited = true;
-    cdc_rcv_queue = xMessageBufferCreate(1024*1);
-#if OPT_CMSIS_DAPV2     
-    xClearBufTimer = xTimerCreate("CLK_DAP",pdMS_TO_TICKS(1000*10),pdTRUE,(void*)0,dapBuf_ClearTimer);
-#endif    
+
+    cdc_rcv_queue  = xMessageBufferCreate(512);
+    dap_rcv_queue  = xMessageBufferCreate(1024*2);
+
+    xTaskCreate(dap_thread, "DAP", DAP_STK_SIZE, NULL, DAP_TASK_PRIO , &DAP_Task_Handler);
+    xTaskCreate(cdc_thread, "UART", UART_STK_SIZE, NULL, UART_TASK_PRIO , &UART_Task_Handler);
+
+    TickType_t wake = xTaskGetTickCount();
     while (1) {
         tud_task();
-        cdc_task();
-#if OPT_CMSIS_DAPV2        
-        do_dap_message();
-#endif        
+        recv_len = tud_vendor_available();
+        if (recv_len) {
+            recv_len = tud_vendor_read((void*)dapRx_Buff, sizeof(dapRx_Buff));
+            size_t ret = xMessageBufferSend(dap_rcv_queue,(const void *)dapRx_Buff,recv_len,portMAX_DELAY);
+            // DAP_Printf("USB SEND MSG:%d : %d \r\n",recv_len,ret);
+            continue;
+        }
+        if (!tud_task_event_ready()){
+            xTaskDelayUntil(&wake,pdMS_TO_TICKS(2));
+        } 
     }
 }
 
@@ -399,7 +367,7 @@ void tusb_task(void *pvParameters)
  *
  * @return  none
  */
-
+extern void board_init();
 int main(void)
 {
 
@@ -409,7 +377,7 @@ int main(void)
 	USART_Printf_Init(115200);
 	board_init();
     
-   VCOM_Init();
+    VCOM_Init();
 
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
@@ -420,13 +388,13 @@ int main(void)
 	/* create two task */
     xTaskCreate((TaskFunction_t )tusb_task,
                         (const char*    )"usbd",
-                        (uint16_t       )LED_STK_SIZE,
+                        (uint16_t       )USB_STK_SIZE,
                         (void*          )NULL,
-                        (UBaseType_t    )LED_TASK_PRIO,
-                        (TaskHandle_t*  )&USBTask_Handler);
+                        (UBaseType_t    )USB_TASK_PRIO,
+                        (TaskHandle_t*  )&USB_Task_Handler);
 
     xTaskCreate((TaskFunction_t )led_task,
-                    (const char*    )"task1",
+                    (const char*    )"led",
                     (uint16_t       )LED_STK_SIZE,
                     (void*          )NULL,
                     (UBaseType_t    )LED_TASK_PRIO,
@@ -470,3 +438,16 @@ int main(void)
     }
 
 #endif
+
+
+void vApplicationStackOverflowHook(TaskHandle_t Task, char *pcTaskName)
+{
+  printf("stack overflow (not the helpful kind) for %s\n", *pcTaskName);
+  while(1);
+}
+
+void vApplicationMallocFailedHook(void)
+{
+  printf("Malloc Failed\n");
+  while(1);
+};
