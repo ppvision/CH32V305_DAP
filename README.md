@@ -66,7 +66,7 @@ sh ./gen_uf2_fw.sh
 
 
 ## where buy:)
-[淘宝小店](https://picsum.photos/id/40/600/400)有售，没生产多少，近成本价，如果自行研究开发，建议买一对，一个可以烧录WCHLink的固件来调试另一块。
+[淘宝小店](https://ppvision.taobao.com/)有售，没生产多少，近成本价，如果自行研究开发，建议买一对，一个可以烧录WCHLink的固件来调试另一块。
 
 
 
