@@ -1,10 +1,7 @@
 今天，我们满怀诚意地为大家介绍一款精心自制的 DAPLink 调试器，它以 CH32V305 为主控芯片，自带一路 USB 转串口功能，具备全面的 TVS/ESD 防护，在兼容官方固件基础上实现了性能的显著提升。
 ![PCB](docs/images/wch32v305-01.jpg)
 ![PCB](docs/images/wch32v305_a0.jpg)
-![PCB](docs/images/wch32v305_a1.jpg)
-![PCB](docs/images/wch32v305_a2.jpg)
-![PCB](docs/images/wch32v305_a3.jpg)
-![PCB](docs/images/wch32v305_a4.jpg)
+
 
 
 # WCH-LinkE
@@ -69,5 +66,7 @@ sh ./gen_uf2_fw.sh
 
 
 ## where buy:)
-淘宝小店有卖，没生产多少，近成本价出，如果自行研究开发，建议买一对，一个可以烧录WCHLink的固件来调试另一块。
+[淘宝小店](https://picsum.photos/id/40/600/400)有售，没生产多少，近成本价，如果自行研究开发，建议买一对，一个可以烧录WCHLink的固件来调试另一块。
+
+
 
